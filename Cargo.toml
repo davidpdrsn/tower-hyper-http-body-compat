@@ -1,0 +1,35 @@
+[package]
+name = "tower-hyper-http-body-compat"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+http1 = ["hyper-1/http1"]
+http2 = ["hyper-1/http2"]
+server = ["hyper-1/server"]
+client = ["hyper-1/client"]
+
+[dependencies]
+http = "0.2.9"
+http-body-04 = { package = "http-body", version = "0.4" }
+http-body-1 = { package = "http-body", version = "1.0.0-rc.2" }
+hyper-1 = { package = "hyper", version = "1.0.0-rc.3" }
+pin-project-lite = "0.2.9"
+tower = { version = "0.4", features = ["util"] }
+tower-service-03 = { package = "tower-service", version = "0.3" }
+
+[dev-dependencies]
+axum = "0.6"
+bytes = "1.0"
+hyper-014 = { package = "hyper", version = "0.14", features = ["full"] }
+hyper-1 = { package = "hyper", version = "1.0.0-rc.3", features = ["full"] }
+http-body-util = "0.1.0-rc.2"
+tokio = { version = "1.0", features = ["full"] }
+tower = { version = "0.4", features = ["full", "make"] }
+tower-http = { version = "0.4", features = [
+    "map-request-body",
+    "map-response-body",
+    "util",
+    "trace",
+] }
