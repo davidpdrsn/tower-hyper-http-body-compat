@@ -1,7 +1,7 @@
 # tower-hyper-http-body-compat
 
-`tower-hyper-http-body-compat` provides adapters between hyper 1.0,
-tower-service 0.3, and http-body 0.4.
+`tower-hyper-http-body-compat` provides adapters between hyper 0.14-1.0,
+http-body 0.4-1.0, and tower-service 0.3.
 
 [![Build status](https://github.com/davidpdrsn/tower-hyper-http-body-compat/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/davidpdrsn/tower-hyper-http-body-compat/actions/workflows/CI.yml)
 [![Crates.io](https://img.shields.io/crates/v/tower-hyper-http-body-compat)](https://crates.io/crates/tower-hyper-http-body-compat)

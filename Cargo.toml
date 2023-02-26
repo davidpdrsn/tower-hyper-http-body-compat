@@ -1,7 +1,13 @@
 [package]
 name = "tower-hyper-http-body-compat"
 version = "0.1.0"
+description = "Adapters between hyper 0.14-1.0, http-body 0.4-1.0, and tower-service 0.3."
 edition = "2021"
+homepage = "https://github.com/davidpdrsn/tower-hyper-http-body-compat"
+keywords = ["http", "hyper", "tower", "axum"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/davidpdrsn/tower-hyper-http-body-compat"
 
 [features]
 default = []
@@ -13,8 +19,8 @@ client = ["hyper-1/client"]
 [dependencies]
 http = "0.2.9"
 http-body-04 = { package = "http-body", version = "0.4" }
-http-body-1 = { package = "http-body", version = "1.0.0-rc.2" }
-hyper-1 = { package = "hyper", version = "1.0.0-rc.3" }
+http-body-1 = { package = "http-body", version = "1.0.0-rc.2" } # remember to update README.md
+hyper-1 = { package = "hyper", version = "1.0.0-rc.3" } # remember to update README.md
 pin-project-lite = "0.2.9"
 tower = { version = "0.4", features = ["util"] }
 tower-service-03 = { package = "tower-service", version = "0.3" }
@@ -33,3 +39,7 @@ tower-http = { version = "0.4", features = [
     "util",
     "trace",
 ] }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
