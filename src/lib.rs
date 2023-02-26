@@ -98,31 +98,27 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg, doc_cfg))]
 #![cfg_attr(test, allow(clippy::float_cmp))]
 
-#[cfg(all(
-    any(feature = "http1", feature = "http2"),
-    any(feature = "server", feature = "client")
-))]
-mod service;
+macro_rules! cfg_service {
+    ($($item:item)*) => {
+        $(
+            #[cfg(all(
+                any(feature = "http1", feature = "http2"),
+                any(feature = "server", feature = "client")
+            ))]
+            $item
+        )*
+    };
+}
 
-#[cfg(all(
-    any(feature = "http1", feature = "http2"),
-    any(feature = "server", feature = "client")
-))]
-pub use service::{Hyper1ServiceAsTowerService03Service, TowerService03ServiceAsHyper1Service};
+cfg_service! {
+    mod service;
+    mod http_service;
 
-#[cfg(all(
-    any(feature = "http1", feature = "http2"),
-    any(feature = "server", feature = "client")
-))]
-mod http_service;
-
-#[cfg(all(
-    any(feature = "http1", feature = "http2"),
-    any(feature = "server", feature = "client")
-))]
-pub use http_service::{
-    Hyper1HttpServiceAsTowerService03HttpService, TowerService03HttpServiceAsHyper1HttpService,
-};
+    pub use service::{Hyper1ServiceAsTowerService03Service, TowerService03ServiceAsHyper1Service};
+    pub use http_service::{
+        Hyper1HttpServiceAsTowerService03HttpService, TowerService03HttpServiceAsHyper1HttpService,
+    };
+}
 
 mod body;
 
@@ -134,9 +130,11 @@ mod tests;
 pub mod future {
     //! Future types.
 
-    pub use crate::http_service::{
-        Hyper1HttpServiceAsTowerService03HttpServiceFuture,
-        TowerService03HttpServiceAsHyper1HttpServiceFuture,
-    };
-    pub use crate::service::TowerService03ServiceAsHyper1ServiceFuture;
+    cfg_service! {
+        pub use crate::http_service::{
+            Hyper1HttpServiceAsTowerService03HttpServiceFuture,
+            TowerService03HttpServiceAsHyper1HttpServiceFuture,
+        };
+        pub use crate::service::TowerService03ServiceAsHyper1ServiceFuture;
+    }
 }

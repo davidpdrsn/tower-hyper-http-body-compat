@@ -43,3 +43,11 @@ tower-http = { version = "0.4", features = [
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.cargo-public-api-crates]
+allowed = [
+    "http",
+    "http_body",
+    "hyper",
+    "tower_service",
+]
