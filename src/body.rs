@@ -131,22 +131,26 @@ where
     }
 
     fn poll_trailers(
-        self: Pin<&mut Self>,
+        mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Result<Option<http::HeaderMap>, Self::Error>> {
-        let this = self.project();
+        loop {
+            let this = self.as_mut().project();
 
-        if let Some(trailers) = this.trailers.take() {
-            return Poll::Ready(Ok(Some(trailers)));
-        }
+            if let Some(trailers) = this.trailers.take() {
+                break Poll::Ready(Ok(Some(trailers)));
+            }
 
-        match task::ready!(this.body.poll_frame(cx)) {
-            Some(Ok(frame)) => match frame.into_trailers() {
-                Ok(trailers) => Poll::Ready(Ok(Some(trailers))),
-                Err(_frame) => Poll::Ready(Ok(None)),
-            },
-            Some(Err(err)) => Poll::Ready(Err(err)),
-            None => Poll::Ready(Ok(None)),
+            match task::ready!(this.body.poll_frame(cx)) {
+                Some(Ok(frame)) => match frame.into_trailers() {
+                    Ok(trailers) => break Poll::Ready(Ok(Some(trailers))),
+                    // we might get a trailers frame on next poll
+                    // so loop and try again
+                    Err(_frame) => {}
+                },
+                Some(Err(err)) => break Poll::Ready(Err(err)),
+                None => break Poll::Ready(Ok(None)),
+            }
         }
     }
 
