@@ -174,6 +174,9 @@ where
 ///
 /// An HTTP `Service` is a `Service` where the request is [`http::Request<_>`][Request] and the
 /// response is [`http::Response<_>`][Response].
+///
+/// [tower-service 0.3 HTTP `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
+/// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.3/hyper/service/trait.Service.html
 pub struct Hyper1HttpServiceAsTowerService03HttpService<S, B> {
     service: S,
     _marker: PhantomData<fn() -> B>,
