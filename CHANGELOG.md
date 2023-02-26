@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Unreleased
 
-- None.
+- **fixed:** Fix not polling again for trailers in `HttpBody1ToHttpBody04` ([#2])
+
+[#2]: https://github.com/davidpdrsn/tower-hyper-http-body-compat/pull/2
 
 # 0.1.0 (26. February, 2023)
 
