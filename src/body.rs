@@ -169,3 +169,9 @@ where
         self.body.is_end_stream()
     }
 }
+
+impl<B: Default> Default for HttpBody1ToHttpBody04<B> {
+    fn default() -> Self {
+        HttpBody1ToHttpBody04::new(B::default())
+    }
+}
