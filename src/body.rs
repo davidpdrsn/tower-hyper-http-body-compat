@@ -78,7 +78,7 @@ pin_project! {
     ///
     /// [http-body 0.4 `Body`]: https://docs.rs/http-body/latest/http_body/trait.Body.html
     /// [http-body 1.0 `Body`]: https://docs.rs/http-body/1.0.0-rc.2/http_body/trait.Body.html
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Default)]
     pub struct HttpBody1ToHttpBody04<B> {
         #[pin]
         body: B,
@@ -167,11 +167,5 @@ where
     #[inline]
     fn is_end_stream(&self) -> bool {
         self.body.is_end_stream()
-    }
-}
-
-impl<B: Default> Default for HttpBody1ToHttpBody04<B> {
-    fn default() -> Self {
-        HttpBody1ToHttpBody04::new(B::default())
     }
 }
