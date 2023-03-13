@@ -78,7 +78,7 @@ pin_project! {
     ///
     /// [http-body 0.4 `Body`]: https://docs.rs/http-body/latest/http_body/trait.Body.html
     /// [http-body 1.0 `Body`]: https://docs.rs/http-body/1.0.0-rc.2/http_body/trait.Body.html
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Default)]
     pub struct HttpBody1ToHttpBody04<B> {
         #[pin]
         body: B,
