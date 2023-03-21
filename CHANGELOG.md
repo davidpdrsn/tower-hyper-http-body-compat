@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Unreleased
 
-- None.
+- **fixed:** Support Rust 1.60.0
 
 # 0.1.3 (13. March, 2023)
 
-- Implement `Default` for `HttpBody1ToHttpBody04` ([#4])
+- **added:** Implement `Default` for `HttpBody1ToHttpBody04` ([#4])
 
 [#4]: https://github.com/davidpdrsn/tower-hyper-http-body-compat/pull/4
 

@@ -3,7 +3,7 @@ use std::{
     future::Future,
     marker::PhantomData,
     pin::Pin,
-    task::{self, Context, Poll},
+    task::{Context, Poll},
 };
 
 use http::{Request, Response};
@@ -163,7 +163,7 @@ where
 
     #[inline]
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let res = task::ready!(self.project().future.poll(cx))?;
+        let res = ready!(self.project().future.poll(cx))?;
         Poll::Ready(Ok(res.map(HttpBody04ToHttpBody1::new)))
     }
 }
@@ -258,7 +258,7 @@ where
 
     #[inline]
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let res = task::ready!(self.project().future.poll(cx))?;
+        let res = ready!(self.project().future.poll(cx))?;
         Poll::Ready(Ok(res.map(HttpBody1ToHttpBody04::new)))
     }
 }
