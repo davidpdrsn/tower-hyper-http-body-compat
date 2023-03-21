@@ -109,7 +109,7 @@ where
         cx: &mut Context<'_>,
     ) -> Poll<Option<Result<Self::Data, Self::Error>>> {
         let this = self.project();
-        match task::ready!(this.body.poll_frame(cx)) {
+        match ready!(this.body.poll_frame(cx)) {
             Some(Ok(frame)) => {
                 let frame = match frame.into_data() {
                     Ok(data) => return Poll::Ready(Some(Ok(data))),
@@ -141,7 +141,7 @@ where
                 break Poll::Ready(Ok(Some(trailers)));
             }
 
-            match task::ready!(this.body.poll_frame(cx)) {
+            match ready!(this.body.poll_frame(cx)) {
                 Some(Ok(frame)) => match frame.into_trailers() {
                     Ok(trailers) => break Poll::Ready(Ok(Some(trailers))),
                     // we might get a trailers frame on next poll

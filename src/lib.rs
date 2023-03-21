@@ -110,6 +110,17 @@ macro_rules! cfg_service {
     };
 }
 
+macro_rules! ready {
+    ($e:expr) => {
+        match $e {
+            std::task::Poll::Ready(t) => t,
+            std::task::Poll::Pending => {
+                return std::task::Poll::Pending;
+            }
+        }
+    };
+}
+
 cfg_service! {
     mod service;
     mod http_service;
