@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Unreleased
 
-- **fixed:** Support Rust 1.60.0
+- None.
+
+# 0.1.4 (13. March, 2023)
+
+- **fixed:** Support Rust 1.60.0 ([#5])
+
+[#5]: https://github.com/davidpdrsn/tower-hyper-http-body-compat/pull/5
 
 # 0.1.3 (13. March, 2023)
 
