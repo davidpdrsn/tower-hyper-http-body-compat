@@ -1,6 +1,6 @@
 use std::{
     pin::Pin,
-    task::{self, Context, Poll},
+    task::{Context, Poll},
 };
 
 use http::HeaderMap;

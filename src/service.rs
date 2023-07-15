@@ -16,7 +16,7 @@ use tower::{util::Oneshot, ServiceExt};
 /// [`TowerService03HttpServiceAsHyper1HttpService`] instead of this.
 ///
 /// [tower-service 0.3 `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
-/// [hyper 1.0 `Service`]: https://docs.rs/hyper/1.0.0-rc.3/hyper/service/trait.Service.html
+/// [hyper 1.0 `Service`]: https://docs.rs/hyper/1.0.0-rc.4/hyper/service/trait.Service.html
 /// [`TowerService03HttpServiceAsHyper1HttpService`]: crate::TowerService03HttpServiceAsHyper1HttpService
 #[derive(Clone, Copy, Debug)]
 pub struct TowerService03ServiceAsHyper1Service<S>(S);
@@ -37,7 +37,7 @@ where
     type Future = TowerService03ServiceAsHyper1ServiceFuture<S, R>;
 
     #[inline]
-    fn call(&mut self, req: R) -> Self::Future {
+    fn call(&self, req: R) -> Self::Future {
         TowerService03ServiceAsHyper1ServiceFuture {
             // have to drive backpressure in the future
             future: self.0.clone().oneshot(req),
@@ -76,7 +76,7 @@ where
 /// [`Hyper1HttpServiceAsTowerService03HttpService`] instead of this.
 ///
 /// [tower-service 0.3 `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
-/// [hyper 1.0 `Service`]: https://docs.rs/hyper/1.0.0-rc.3/hyper/service/trait.Service.html
+/// [hyper 1.0 `Service`]: https://docs.rs/hyper/1.0.0-rc.4/hyper/service/trait.Service.html
 /// [`Hyper1HttpServiceAsTowerService03HttpService`]: crate::Hyper1HttpServiceAsTowerService03HttpService
 #[derive(Clone, Copy, Debug)]
 pub struct Hyper1ServiceAsTowerService03Service<S>(S);

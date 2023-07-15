@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Unreleased
 
-- None.
+- Update to hyper-1.0.0-rc.4 ([#6])
+
+[#6]: https://github.com/davidpdrsn/tower-hyper-http-body-compat/pull/6
 
 # 0.1.4 (13. March, 2023)
 

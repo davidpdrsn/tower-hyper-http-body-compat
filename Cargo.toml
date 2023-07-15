@@ -20,7 +20,7 @@ client = ["hyper-1/client"]
 http = "0.2.9"
 http-body-04 = { package = "http-body", version = "0.4" }
 http-body-1 = { package = "http-body", version = "1.0.0-rc.2" } # remember to update README.md
-hyper-1 = { package = "hyper", version = "1.0.0-rc.3" } # remember to update README.md
+hyper-1 = { package = "hyper", version = "1.0.0-rc.4" } # remember to update README.md
 pin-project-lite = "0.2.9"
 tower = { version = "0.4", features = ["util"] }
 tower-service-03 = { package = "tower-service", version = "0.3" }
@@ -29,8 +29,9 @@ tower-service-03 = { package = "tower-service", version = "0.3" }
 axum = "0.6"
 bytes = "1.0"
 hyper-014 = { package = "hyper", version = "0.14", features = ["full"] }
-hyper-1 = { package = "hyper", version = "1.0.0-rc.3", features = ["full"] }
+hyper-1 = { package = "hyper", version = "1.0.0-rc.4", features = ["full"] }
 http-body-util = "0.1.0-rc.2"
+hyper-util = { git = "https://github.com/hyperium/hyper-util", features = ["full"] }
 tokio = { version = "1.0", features = ["full"] }
 tower = { version = "0.4", features = ["full", "make"] }
 tower-http = { version = "0.4", features = [
