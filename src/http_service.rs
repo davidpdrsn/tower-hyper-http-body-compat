@@ -64,6 +64,7 @@ use crate::{HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
 ///     let mut tcp_listener = TcpListener::bind(addr).await?;
 ///     loop {
 ///         let (tcp_stream, _) = tcp_listener.accept().await?;
+///         let tcp_stream = hyper_util::rt::TokioIo::new(tcp_stream);
 ///         let service = service.clone();
 ///         tokio::task::spawn(async move {
 ///             if let Err(http_err) = http1::Builder::new()
@@ -78,7 +79,7 @@ use crate::{HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
 /// ```
 ///
 /// [tower-service 0.3 HTTP `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
-/// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.3/hyper/service/trait.Service.html
+/// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.4/hyper/service/trait.Service.html
 pub struct TowerService03HttpServiceAsHyper1HttpService<S, B> {
     service: S,
     _marker: PhantomData<fn() -> B>,
@@ -136,7 +137,7 @@ where
     >;
 
     #[inline]
-    fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
+    fn call(&self, req: Request<ReqBody>) -> Self::Future {
         let req = req.map(HttpBody1ToHttpBody04::new);
         TowerService03HttpServiceAsHyper1HttpServiceFuture {
             future: self.service.clone().oneshot(req),
@@ -176,7 +177,7 @@ where
 /// response is [`http::Response<_>`][Response].
 ///
 /// [tower-service 0.3 HTTP `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
-/// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.3/hyper/service/trait.Service.html
+/// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.4/hyper/service/trait.Service.html
 pub struct Hyper1HttpServiceAsTowerService03HttpService<S, B> {
     service: S,
     _marker: PhantomData<fn() -> B>,

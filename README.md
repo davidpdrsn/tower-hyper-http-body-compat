@@ -38,6 +38,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut tcp_listener = TcpListener::bind(addr).await?;
     loop {
         let (tcp_stream, _) = tcp_listener.accept().await?;
+
+        // hyper-util isn't on crates.io yet. Instead depend on it via git
+        // `hyper-util = { git = "https://github.com/hyperium/hyper-util" }`
+        let tcp_stream = hyper_util::rt::TokioIo::new(tcp_stream);
+
         let service = service.clone();
         tokio::task::spawn(async move {
             if let Err(http_err) = http1::Builder::new()

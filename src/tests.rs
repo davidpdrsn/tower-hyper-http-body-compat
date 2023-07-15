@@ -29,6 +29,7 @@ async fn tower_service_03_service_to_hyper_1_service() {
     tokio::task::spawn(async move {
         loop {
             let (tcp_stream, _) = tcp_listener.accept().await.unwrap();
+            let tcp_stream = hyper_util::rt::TokioIo::new(tcp_stream);
             tokio::spawn(async move {
                 http1::Builder::new()
                     .serve_connection(tcp_stream, svc)
