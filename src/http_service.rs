@@ -6,11 +6,10 @@ use std::{
     task::{Context, Poll},
 };
 
-use http_1::{Request, Response};
 use pin_project_lite::pin_project;
 use tower::{util::Oneshot, ServiceExt};
 
-use crate::{HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
+use crate::{http02_request_to_http1, http02_response_to_http1, http1_request_to_http02, http1_response_to_http02, HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
 
 // --- tower-service 0.3 (http) to hyper 1.0 (http) ---
 
@@ -121,26 +120,26 @@ where
     }
 }
 
-impl<S, ReqBody, ResBody> hyper_1::service::Service<Request<ReqBody>>
+impl<S, ReqBody, ResBody> hyper_1::service::Service<http_1::Request<ReqBody>>
     for TowerService03HttpServiceAsHyper1HttpService<S, HttpBody1ToHttpBody04<ReqBody>>
 where
     S: tower_service_03::Service<
-            Request<HttpBody1ToHttpBody04<ReqBody>>,
-            Response = Response<ResBody>,
+            http_02::Request<HttpBody1ToHttpBody04<ReqBody>>,
+            Response = http_02::Response<ResBody>,
         > + Clone,
 {
-    type Response = Response<HttpBody04ToHttpBody1<ResBody>>;
+    type Response = http_1::Response<HttpBody04ToHttpBody1<ResBody>>;
     type Error = S::Error;
     type Future = TowerService03HttpServiceAsHyper1HttpServiceFuture<
         S,
-        Request<HttpBody1ToHttpBody04<ReqBody>>,
+        http_02::Request<HttpBody1ToHttpBody04<ReqBody>>,
     >;
 
     #[inline]
-    fn call(&self, req: Request<ReqBody>) -> Self::Future {
+    fn call(&self, req: http_1::Request<ReqBody>) -> Self::Future {
         let req = req.map(HttpBody1ToHttpBody04::new);
         TowerService03HttpServiceAsHyper1HttpServiceFuture {
-            future: self.service.clone().oneshot(req),
+            future: self.service.clone().oneshot(http1_request_to_http02(req)),
         }
     }
 }
@@ -158,14 +157,14 @@ pin_project! {
 
 impl<S, R, B> Future for TowerService03HttpServiceAsHyper1HttpServiceFuture<S, R>
 where
-    S: tower_service_03::Service<R, Response = Response<B>>,
+    S: tower_service_03::Service<R, Response = http_02::Response<B>>,
 {
-    type Output = Result<Response<HttpBody04ToHttpBody1<B>>, S::Error>;
+    type Output = Result<http_1::Response<HttpBody04ToHttpBody1<B>>, S::Error>;
 
     #[inline]
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let res = ready!(self.project().future.poll(cx))?;
-        Poll::Ready(Ok(res.map(HttpBody04ToHttpBody1::new)))
+        Poll::Ready(Ok(http02_response_to_http1(res.map(HttpBody04ToHttpBody1::new))))
     }
 }
 
@@ -218,15 +217,15 @@ where
 
 impl<S, B> Copy for Hyper1HttpServiceAsTowerService03HttpService<S, B> where S: Copy {}
 
-impl<S, ReqBody, ResBody> tower_service_03::Service<Request<ReqBody>>
+impl<S, ReqBody, ResBody> tower_service_03::Service<http_02::Request<ReqBody>>
     for Hyper1HttpServiceAsTowerService03HttpService<S, ReqBody>
 where
     S: hyper_1::service::Service<
-        Request<HttpBody04ToHttpBody1<ReqBody>>,
-        Response = Response<ResBody>,
+        http_1::Request<HttpBody04ToHttpBody1<ReqBody>>,
+        Response = http_1::Response<ResBody>,
     >,
 {
-    type Response = Response<HttpBody1ToHttpBody04<ResBody>>;
+    type Response = http_02::Response<HttpBody1ToHttpBody04<ResBody>>;
     type Error = S::Error;
     type Future = Hyper1HttpServiceAsTowerService03HttpServiceFuture<S::Future>;
 
@@ -235,8 +234,8 @@ where
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, req: Request<ReqBody>) -> Self::Future {
-        let req = req.map(HttpBody04ToHttpBody1::new);
+    fn call(&mut self, req: http_02::Request<ReqBody>) -> Self::Future {
+        let req = http02_request_to_http1(req.map(HttpBody04ToHttpBody1::new));
         Hyper1HttpServiceAsTowerService03HttpServiceFuture {
             future: self.service.call(req),
         }
@@ -253,13 +252,13 @@ pin_project! {
 
 impl<F, B, E> Future for Hyper1HttpServiceAsTowerService03HttpServiceFuture<F>
 where
-    F: Future<Output = Result<Response<B>, E>>,
+    F: Future<Output = Result<http_1::Response<B>, E>>,
 {
-    type Output = Result<Response<HttpBody1ToHttpBody04<B>>, E>;
+    type Output = Result<http_02::Response<HttpBody1ToHttpBody04<B>>, E>;
 
     #[inline]
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let res = ready!(self.project().future.poll(cx))?;
-        Poll::Ready(Ok(res.map(HttpBody1ToHttpBody04::new)))
+        Poll::Ready(Ok(http1_response_to_http02(res.map(HttpBody1ToHttpBody04::new))))
     }
 }
