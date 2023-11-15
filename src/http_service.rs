@@ -6,7 +6,7 @@ use std::{
     task::{Context, Poll},
 };
 
-use http::{Request, Response};
+use http_1::{Request, Response};
 use pin_project_lite::pin_project;
 use tower::{util::Oneshot, ServiceExt};
 

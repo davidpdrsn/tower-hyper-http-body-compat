@@ -181,3 +181,31 @@ fn http02_headermap_to_http1(h: http_02::HeaderMap) -> http_1::HeaderMap {
         std::mem::transmute::<http_02::HeaderMap, http_1::HeaderMap>(h)
     }
 }
+
+pub fn http1_request_to_http02<B>(r: http_1::Request<B>) -> http_02::Request<B> {
+    let (head, body) = r.into_parts();
+    unsafe {
+        http_02::Request::from_parts(std::mem::transmute::<_, http_02::request::Parts>(head), body)
+    }
+}
+
+pub fn http1_response_to_http02<B>(r: http_1::Response<B>) -> http_02::Response<B> {
+    let (head, body) = r.into_parts();
+    unsafe {
+        http_02::Response::from_parts(std::mem::transmute::<_, http_02::response::Parts>(head), body)
+    }
+}
+
+pub fn http02_request_to_http1<B>(r: http_02::Request<B>) -> http_1::Request<B> {
+    let (head, body) = r.into_parts();
+    unsafe {
+        http_1::Request::from_parts(std::mem::transmute::<_, http_1::request::Parts>(head), body)
+    }
+}
+
+pub fn http02_response_to_http1<B>(r: http_02::Response<B>) -> http_1::Response<B> {
+    let (head, body) = r.into_parts();
+    unsafe {
+        http_1::Response::from_parts(std::mem::transmute::<_, http_1::response::Parts>(head), body)
+    }
+}
