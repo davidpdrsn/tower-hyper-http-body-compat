@@ -3,7 +3,7 @@ use std::{
     task::{Context, Poll},
 };
 
-use http::HeaderMap;
+use http_1::HeaderMap;
 use http_body_1::Frame;
 use pin_project_lite::pin_project;
 
@@ -48,7 +48,7 @@ where
         }
 
         match self.as_mut().project().body.poll_trailers(cx) {
-            Poll::Ready(Ok(Some(trailers))) => Poll::Ready(Some(Ok(Frame::trailers(trailers)))),
+            Poll::Ready(Ok(Some(trailers))) => Poll::Ready(Some(Ok(Frame::trailers(http02_headermap_to_http1(trailers))))),
             Poll::Ready(Ok(None)) => Poll::Ready(None),
             Poll::Ready(Err(err)) => Poll::Ready(Some(Err(err))),
             Poll::Pending => Poll::Pending,
@@ -133,17 +133,17 @@ where
     fn poll_trailers(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-    ) -> Poll<Result<Option<http::HeaderMap>, Self::Error>> {
+    ) -> Poll<Result<Option<http_02::HeaderMap>, Self::Error>> {
         loop {
             let this = self.as_mut().project();
 
             if let Some(trailers) = this.trailers.take() {
-                break Poll::Ready(Ok(Some(trailers)));
+                break Poll::Ready(Ok(Some(http1_headermap_to_http02(trailers))));
             }
 
             match ready!(this.body.poll_frame(cx)) {
                 Some(Ok(frame)) => match frame.into_trailers() {
-                    Ok(trailers) => break Poll::Ready(Ok(Some(trailers))),
+                    Ok(trailers) => break Poll::Ready(Ok(Some(http1_headermap_to_http02(trailers)))),
                     // we might get a trailers frame on next poll
                     // so loop and try again
                     Err(_frame) => {}
@@ -167,5 +167,17 @@ where
     #[inline]
     fn is_end_stream(&self) -> bool {
         self.body.is_end_stream()
+    }
+}
+
+fn http1_headermap_to_http02(h: http_1::HeaderMap) -> http_02::HeaderMap {
+    unsafe {
+        std::mem::transmute::<http_1::HeaderMap, http_02::HeaderMap>(h)
+    }
+}
+
+fn http02_headermap_to_http1(h: http_02::HeaderMap) -> http_1::HeaderMap {
+    unsafe {
+        std::mem::transmute::<http_02::HeaderMap, http_1::HeaderMap>(h)
     }
 }
