@@ -138,9 +138,9 @@ cfg_service! {
 
 mod body;
 
-pub use body::{HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
-pub use body::{http1_request_to_http02, http1_response_to_http02};
 pub use body::{http02_request_to_http1, http02_response_to_http1};
+pub use body::{http1_request_to_http02, http1_response_to_http02};
+pub use body::{HttpBody04ToHttpBody1, HttpBody1ToHttpBody04};
 
 #[cfg(test)]
 mod tests;
