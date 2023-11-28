@@ -174,7 +174,7 @@ where
     }
 }
 
-// http1_headermap_to_http02 converts an http-1.0 HeaderMap to an http-0.2 HeaderMap.
+/// http1_headermap_to_http02 converts an http-1.0 HeaderMap to an http-0.2 HeaderMap.
 fn http1_headermap_to_http02(h: http_1::HeaderMap) -> http_02::HeaderMap {
     let mut hm = http_02::HeaderMap::new();
     for (k, v) in h {
@@ -186,7 +186,7 @@ fn http1_headermap_to_http02(h: http_1::HeaderMap) -> http_02::HeaderMap {
     hm
 }
 
-// http02_headermap_to_http1 converts an http-0.2 HeaderMap to an http-1.0 HeaderMap.
+/// http02_headermap_to_http1 converts an http-0.2 HeaderMap to an http-1.0 HeaderMap.
 fn http02_headermap_to_http1(h: http_02::HeaderMap) -> http_1::HeaderMap {
     let mut hm = http_1::HeaderMap::new();
     for (k, v) in h {
@@ -198,8 +198,8 @@ fn http02_headermap_to_http1(h: http_02::HeaderMap) -> http_1::HeaderMap {
     hm
 }
 
-// http1_request_to_http02 converts an http-1.0 Request to an http-0.2 Request.
-// Warning: this conversion is lossy. The Extension field of the request will be lost.
+/// http1_request_to_http02 converts an http-1.0 Request to an http-0.2 Request.
+/// Warning: this conversion is lossy. The Extension field of the request will be lost.
 pub fn http1_request_to_http02<B>(r: http_1::Request<B>) -> http_02::Request<B> {
     let (head, body) = r.into_parts();
     let mut build = http_02::request::Builder::new()
@@ -220,8 +220,8 @@ pub fn http1_request_to_http02<B>(r: http_1::Request<B>) -> http_02::Request<B> 
     build.body(body).unwrap()
 }
 
-// http1_response_to_http02 converts an http-1.0 Response to an http-0.2 Response.
-// Warning: this conversion is lossy. The Extension field of the response will be lost.
+/// http1_response_to_http02 converts an http-1.0 Response to an http-0.2 Response.
+/// Warning: this conversion is lossy. The Extension field of the response will be lost.
 pub fn http1_response_to_http02<B>(r: http_1::Response<B>) -> http_02::Response<B> {
     let (head, body) = r.into_parts();
     let mut build = http_02::response::Builder::new()
@@ -241,8 +241,8 @@ pub fn http1_response_to_http02<B>(r: http_1::Response<B>) -> http_02::Response<
     build.body(body).unwrap()
 }
 
-// http02_request_to_http1 converts an http-0.2 Request to an http-1.0 Request.
-// Warning: this conversion is lossy. The Extension field of the request will be lost.
+/// http02_request_to_http1 converts an http-0.2 Request to an http-1.0 Request.
+/// Warning: this conversion is lossy. The Extension field of the request will be lost.
 pub fn http02_request_to_http1<B>(r: http_02::Request<B>) -> http_1::Request<B> {
     let (head, body) = r.into_parts();
     let mut build = http_1::request::Builder::new()
@@ -263,8 +263,8 @@ pub fn http02_request_to_http1<B>(r: http_02::Request<B>) -> http_1::Request<B> 
     build.body(body).unwrap()
 }
 
-// http02_request_to_http1 converts an http-0.2 Response to an http-1.0 Response.
-// Warning: this conversion is lossy. The Extension field of the response will be lost.
+/// http02_request_to_http1 converts an http-0.2 Response to an http-1.0 Response.
+/// Warning: this conversion is lossy. The Extension field of the response will be lost.
 pub fn http02_response_to_http1<B>(r: http_02::Response<B>) -> http_1::Response<B> {
     let (head, body) = r.into_parts();
     let mut build = http_1::response::Builder::new()

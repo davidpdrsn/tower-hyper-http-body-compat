@@ -9,7 +9,9 @@ use crate::*;
 
 #[tokio::test]
 async fn tower_service_03_service_to_hyper_1_service() {
-    async fn handle<B>(req: http_02::Request<B>) -> Result<http_02::Response<hyper_014::Body>, Infallible>
+    async fn handle<B>(
+        req: http_02::Request<B>,
+    ) -> Result<http_02::Response<hyper_014::Body>, Infallible>
     where
         B: http_body_04::Body,
     {
@@ -57,18 +59,22 @@ async fn tower_service_03_service_to_hyper_1_service() {
 
 #[tokio::test]
 async fn hyper_1_service_to_tower_service_03_service() {
-    async fn handle<B>(req: http_1::Request<B>) -> Result<http_1::Response<http_body_util::Full<Bytes>>, Infallible>
+    async fn handle<B>(
+        req: http_1::Request<B>,
+    ) -> Result<http_1::Response<http_body_util::Full<Bytes>>, Infallible>
     where
         B: http_body_1::Body,
     {
         let collected = req.into_body().collect().await.unwrap_or_else(|_| panic!());
         assert_eq!(collected.to_bytes(), "in");
 
-        Ok(http_1::Response::new(http_body_util::Full::new(Bytes::from("out"))))
+        Ok(http_1::Response::new(http_body_util::Full::new(
+            Bytes::from("out"),
+        )))
     }
 
     let svc = hyper_1::service::service_fn(handle);
-    let svc = crate::Hyper1HttpServiceAsTowerService03HttpService::new(svc);
+    let svc = Hyper1HttpServiceAsTowerService03HttpService::new(svc);
 
     let tcp_listener = std::net::TcpListener::bind("0.0.0.0:0").unwrap();
     let addr = tcp_listener.local_addr().unwrap();
