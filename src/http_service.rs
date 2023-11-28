@@ -15,20 +15,19 @@ use crate::{http02_request_to_http1, http02_response_to_http1, http1_request_to_
 
 /// Converts a [tower-service 0.3 HTTP `Service`] to a [hyper 1.0 HTTP `Service`].
 ///
-/// An HTTP `Service` is a `Service` where the request is [`http::Request<_>`][Request] and the
-/// response is [`http::Response<_>`][Response].
+/// An HTTP `Service` is a `Service` where the request is [`http::Request<_>`][http_1::Request] and the
+/// response is [`http::Response<_>`][http_1::Response].
 ///
 /// # Example
 ///
 /// ```no_run
-/// use http::{Request, Response, StatusCode};
 /// use hyper_1::{server::conn::http1, service::service_fn, body, body::Bytes};
 /// use std::{net::SocketAddr, convert::Infallible};
 /// use tokio::net::TcpListener;
 /// use tower_hyper_http_body_compat::TowerService03HttpServiceAsHyper1HttpService;
 ///
 /// // a service function that uses hyper 0.14, tower-service 0.3, and http-body 0.4
-/// async fn handler<B>(req: Request<B>) -> Result<Response<hyper_014::body::Body>, Infallible>
+/// async fn handler<B>(req: http_02::Request<B>) -> Result<http_02::Response<hyper_014::body::Body>, Infallible>
 /// where
 ///     B: hyper_014::body::HttpBody<Data = hyper_014::body::Bytes>,
 ///     B::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
@@ -38,15 +37,15 @@ use crate::{http02_request_to_http1, http02_response_to_http1, http1_request_to_
 ///    let bytes = match hyper_014::body::to_bytes(body).await {
 ///        Ok(bytes) => bytes,
 ///        Err(err) => {
-///            let res = Response::builder()
-///                .status(StatusCode::BAD_REQUEST)
+///            let res = http_02::Response::builder()
+///                .status(http_02::StatusCode::BAD_REQUEST)
 ///                .body(hyper_014::body::Body::empty())
 ///                .unwrap();
 ///            return Ok(res)
 ///        }
 ///    };
 ///
-///    let res = Response::builder()
+///    let res = http_02::Response::builder()
 ///        .body(hyper_014::body::Body::from(format!("Received {} bytes", bytes.len())))
 ///        .unwrap();
 ///    Ok(res)
@@ -172,8 +171,8 @@ where
 
 /// Converts a [hyper 1.0 HTTP `Service`] to a [tower-service 0.3 HTTP `Service`].
 ///
-/// An HTTP `Service` is a `Service` where the request is [`http::Request<_>`][Request] and the
-/// response is [`http::Response<_>`][Response].
+/// An HTTP `Service` is a `Service` where the request is [`http::Request<_>`][http_02::Request] and the
+/// response is [`http::Response<_>`][http_02::Response].
 ///
 /// [tower-service 0.3 HTTP `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
 /// [hyper 1.0 HTTP `Service`]: https://docs.rs/hyper/1.0.0-rc.4/hyper/service/trait.Service.html
