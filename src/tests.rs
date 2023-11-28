@@ -1,7 +1,6 @@
 use std::convert::Infallible;
 
 use bytes::Bytes;
-use http::{Request, Response, StatusCode};
 use http_body_util::BodyExt;
 use hyper_1::server::conn::http1;
 use tokio::net::TcpListener;
@@ -10,7 +9,9 @@ use crate::*;
 
 #[tokio::test]
 async fn tower_service_03_service_to_hyper_1_service() {
-    async fn handle<B>(req: Request<B>) -> Result<Response<hyper_014::Body>, Infallible>
+    async fn handle<B>(
+        req: http_02::Request<B>,
+    ) -> Result<http_02::Response<hyper_014::Body>, Infallible>
     where
         B: http_body_04::Body,
     {
@@ -18,7 +19,7 @@ async fn tower_service_03_service_to_hyper_1_service() {
             .await
             .unwrap_or_else(|_| panic!());
         assert_eq!(bytes, "in");
-        Ok(Response::new(hyper_014::Body::from("out")))
+        Ok(http_02::Response::new(hyper_014::Body::from("out")))
     }
 
     let svc = tower::service_fn(handle);
@@ -42,7 +43,7 @@ async fn tower_service_03_service_to_hyper_1_service() {
     let client = hyper_014::Client::builder().build_http();
     let mut res = client
         .request(
-            Request::builder()
+            http_02::Request::builder()
                 .uri(format!("http://{addr}"))
                 .body(hyper_014::Body::from("in"))
                 .unwrap(),
@@ -50,7 +51,7 @@ async fn tower_service_03_service_to_hyper_1_service() {
         .await
         .unwrap();
 
-    assert_eq!(res.status(), StatusCode::OK);
+    assert_eq!(res.status(), http_02::StatusCode::OK);
 
     let bytes = hyper_014::body::to_bytes(&mut res).await.unwrap();
     assert_eq!(bytes, "out");
@@ -58,14 +59,18 @@ async fn tower_service_03_service_to_hyper_1_service() {
 
 #[tokio::test]
 async fn hyper_1_service_to_tower_service_03_service() {
-    async fn handle<B>(req: Request<B>) -> Result<Response<http_body_util::Full<Bytes>>, Infallible>
+    async fn handle<B>(
+        req: http_1::Request<B>,
+    ) -> Result<http_1::Response<http_body_util::Full<Bytes>>, Infallible>
     where
         B: http_body_1::Body,
     {
         let collected = req.into_body().collect().await.unwrap_or_else(|_| panic!());
         assert_eq!(collected.to_bytes(), "in");
 
-        Ok(Response::new(http_body_util::Full::new(Bytes::from("out"))))
+        Ok(http_1::Response::new(http_body_util::Full::new(
+            Bytes::from("out"),
+        )))
     }
 
     let svc = hyper_1::service::service_fn(handle);
@@ -84,7 +89,7 @@ async fn hyper_1_service_to_tower_service_03_service() {
     let client = hyper_014::Client::builder().build_http();
     let mut res = client
         .request(
-            Request::builder()
+            http_02::Request::builder()
                 .uri(format!("http://{addr}"))
                 .body(hyper_014::Body::from("in"))
                 .unwrap(),
@@ -92,7 +97,7 @@ async fn hyper_1_service_to_tower_service_03_service() {
         .await
         .unwrap();
 
-    assert_eq!(res.status(), StatusCode::OK);
+    assert_eq!(res.status(), http_02::StatusCode::OK);
 
     let bytes = hyper_014::body::to_bytes(&mut res).await.unwrap();
     assert_eq!(bytes, "out");

@@ -12,7 +12,7 @@ use tower::{util::Oneshot, ServiceExt};
 
 /// Converts a [tower-service 0.3 `Service`] to a [hyper 1.0 `Service`].
 ///
-/// If you have a service that uses [`http::Request`] and [`http::Response`] then you probaby need
+/// If you have a service that uses [`http_02::Request`] and [`http_02::Response`] then you probaby need
 /// [`TowerService03HttpServiceAsHyper1HttpService`] instead of this.
 ///
 /// [tower-service 0.3 `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html
@@ -72,7 +72,7 @@ where
 
 /// Converts a [hyper 1.0 `Service`] to a [tower-service 0.3 `Service`].
 ///
-/// If you have a service that uses [`http::Request`] and [`http::Response`] then you probaby need
+/// If you have a service that uses [`http_1::Request`] and [`http_1::Response`] then you probaby need
 /// [`Hyper1HttpServiceAsTowerService03HttpService`] instead of this.
 ///
 /// [tower-service 0.3 `Service`]: https://docs.rs/tower-service/latest/tower_service/trait.Service.html

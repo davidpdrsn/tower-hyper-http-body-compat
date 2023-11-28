@@ -1,11 +1,11 @@
+use http_1::HeaderMap;
+use http_body_1::Frame;
+use pin_project_lite::pin_project;
+use std::str::FromStr;
 use std::{
     pin::Pin,
     task::{Context, Poll},
 };
-
-use http::HeaderMap;
-use http_body_1::Frame;
-use pin_project_lite::pin_project;
 
 // --- http-body 0.4 to http-body 1.0 ---
 
@@ -48,7 +48,9 @@ where
         }
 
         match self.as_mut().project().body.poll_trailers(cx) {
-            Poll::Ready(Ok(Some(trailers))) => Poll::Ready(Some(Ok(Frame::trailers(trailers)))),
+            Poll::Ready(Ok(Some(trailers))) => Poll::Ready(Some(Ok(Frame::trailers(
+                http02_headermap_to_http1(trailers),
+            )))),
             Poll::Ready(Ok(None)) => Poll::Ready(None),
             Poll::Ready(Err(err)) => Poll::Ready(Some(Err(err))),
             Poll::Pending => Poll::Pending,
@@ -133,17 +135,19 @@ where
     fn poll_trailers(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-    ) -> Poll<Result<Option<http::HeaderMap>, Self::Error>> {
+    ) -> Poll<Result<Option<http_02::HeaderMap>, Self::Error>> {
         loop {
             let this = self.as_mut().project();
 
             if let Some(trailers) = this.trailers.take() {
-                break Poll::Ready(Ok(Some(trailers)));
+                break Poll::Ready(Ok(Some(http1_headermap_to_http02(trailers))));
             }
 
             match ready!(this.body.poll_frame(cx)) {
                 Some(Ok(frame)) => match frame.into_trailers() {
-                    Ok(trailers) => break Poll::Ready(Ok(Some(trailers))),
+                    Ok(trailers) => {
+                        break Poll::Ready(Ok(Some(http1_headermap_to_http02(trailers))))
+                    }
                     // we might get a trailers frame on next poll
                     // so loop and try again
                     Err(_frame) => {}
@@ -168,4 +172,114 @@ where
     fn is_end_stream(&self) -> bool {
         self.body.is_end_stream()
     }
+}
+
+/// http1_headermap_to_http02 converts an http-1.0 HeaderMap to an http-0.2 HeaderMap.
+fn http1_headermap_to_http02(h: http_1::HeaderMap) -> http_02::HeaderMap {
+    let mut hm = http_02::HeaderMap::new();
+    for (k, v) in h {
+        hm.insert(
+            http_02::HeaderName::from_str(k.unwrap().as_str()).unwrap(),
+            http_02::HeaderValue::from_bytes(v.as_ref()).unwrap(),
+        );
+    }
+    hm
+}
+
+/// http02_headermap_to_http1 converts an http-0.2 HeaderMap to an http-1.0 HeaderMap.
+fn http02_headermap_to_http1(h: http_02::HeaderMap) -> http_1::HeaderMap {
+    let mut hm = http_1::HeaderMap::new();
+    for (k, v) in h {
+        hm.insert(
+            http_1::HeaderName::from_str(k.unwrap().as_str()).unwrap(),
+            http_1::HeaderValue::from_bytes(v.as_ref()).unwrap(),
+        );
+    }
+    hm
+}
+
+/// http1_request_to_http02 converts an http-1.0 Request to an http-0.2 Request.
+/// Warning: this conversion is lossy. The Extension field of the request will be lost.
+pub fn http1_request_to_http02<B>(r: http_1::Request<B>) -> http_02::Request<B> {
+    let (head, body) = r.into_parts();
+    let mut build = http_02::request::Builder::new()
+        .method(head.method.as_str())
+        .uri(format!("{}", head.uri))
+        .version(match head.version {
+            http_1::version::Version::HTTP_09 => http_02::version::Version::HTTP_09,
+            http_1::version::Version::HTTP_10 => http_02::version::Version::HTTP_10,
+            http_1::version::Version::HTTP_11 => http_02::version::Version::HTTP_11,
+            http_1::version::Version::HTTP_2 => http_02::version::Version::HTTP_2,
+            http_1::version::Version::HTTP_3 => http_02::version::Version::HTTP_3,
+            _ => panic!("unknown version"),
+        });
+    for (k, v) in head.headers {
+        build = build.header(k.unwrap().as_str(), v.as_ref())
+    }
+    // TODO: there is not a way to convert extension over
+    build.body(body).unwrap()
+}
+
+/// http1_response_to_http02 converts an http-1.0 Response to an http-0.2 Response.
+/// Warning: this conversion is lossy. The Extension field of the response will be lost.
+pub fn http1_response_to_http02<B>(r: http_1::Response<B>) -> http_02::Response<B> {
+    let (head, body) = r.into_parts();
+    let mut build = http_02::response::Builder::new()
+        .status(head.status.as_u16())
+        .version(match head.version {
+            http_1::version::Version::HTTP_09 => http_02::version::Version::HTTP_09,
+            http_1::version::Version::HTTP_10 => http_02::version::Version::HTTP_10,
+            http_1::version::Version::HTTP_11 => http_02::version::Version::HTTP_11,
+            http_1::version::Version::HTTP_2 => http_02::version::Version::HTTP_2,
+            http_1::version::Version::HTTP_3 => http_02::version::Version::HTTP_3,
+            _ => panic!("unknown version"),
+        });
+    for (k, v) in head.headers {
+        build = build.header(k.unwrap().as_str(), v.as_ref())
+    }
+    // TODO: there is not a way to convert extension over
+    build.body(body).unwrap()
+}
+
+/// http02_request_to_http1 converts an http-0.2 Request to an http-1.0 Request.
+/// Warning: this conversion is lossy. The Extension field of the request will be lost.
+pub fn http02_request_to_http1<B>(r: http_02::Request<B>) -> http_1::Request<B> {
+    let (head, body) = r.into_parts();
+    let mut build = http_1::request::Builder::new()
+        .method(head.method.as_str())
+        .uri(format!("{}", head.uri))
+        .version(match head.version {
+            http_02::version::Version::HTTP_09 => http_1::version::Version::HTTP_09,
+            http_02::version::Version::HTTP_10 => http_1::version::Version::HTTP_10,
+            http_02::version::Version::HTTP_11 => http_1::version::Version::HTTP_11,
+            http_02::version::Version::HTTP_2 => http_1::version::Version::HTTP_2,
+            http_02::version::Version::HTTP_3 => http_1::version::Version::HTTP_3,
+            _ => panic!("unknown version"),
+        });
+    for (k, v) in head.headers {
+        build = build.header(k.unwrap().as_str(), v.as_ref())
+    }
+    // TODO: there is not a way to convert extension over
+    build.body(body).unwrap()
+}
+
+/// http02_request_to_http1 converts an http-0.2 Response to an http-1.0 Response.
+/// Warning: this conversion is lossy. The Extension field of the response will be lost.
+pub fn http02_response_to_http1<B>(r: http_02::Response<B>) -> http_1::Response<B> {
+    let (head, body) = r.into_parts();
+    let mut build = http_1::response::Builder::new()
+        .status(head.status.as_u16())
+        .version(match head.version {
+            http_02::version::Version::HTTP_09 => http_1::version::Version::HTTP_09,
+            http_02::version::Version::HTTP_10 => http_1::version::Version::HTTP_10,
+            http_02::version::Version::HTTP_11 => http_1::version::Version::HTTP_11,
+            http_02::version::Version::HTTP_2 => http_1::version::Version::HTTP_2,
+            http_02::version::Version::HTTP_3 => http_1::version::Version::HTTP_3,
+            _ => panic!("unknown version"),
+        });
+    for (k, v) in head.headers {
+        build = build.header(k.unwrap().as_str(), v.as_ref())
+    }
+    // TODO: there is not a way to convert extension over
+    build.body(body).unwrap()
 }
